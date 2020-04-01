@@ -31,8 +31,11 @@ Output:
    A handle to the database connection
 */
 function databaseConnect($dbHost, $dbPort, $dbUser, $dbPass, $dbName) {
-   $dbh = new mysqli("{$dbHost}:{$dbPort}", $dbUser, $dbPass, $dbName);
-   return $dbh;
+    $dbh = new mysqli($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
+    if ($dbh->connect_errno) {
+        echo "Failed to connect to MySQL: (" . $dbh->connect_errno . ") " . $dbh->connect_error;
+    }
+    return $dbh;
 }
 
 function getTargetPreference($dbh, &$output, $hash){
@@ -331,7 +334,7 @@ Output:
 */
 function getRegions($dbh, &$output, $userID) {
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    $result = $dbh->query("SELECT r.`id`, r.`name`, r.`states`, r.`population`, CASE WHEN s.`user_id` IS NULL THEN FALSE ELSE TRUE END `completed` FROM ec_fluv_regions r LEFT JOIN ec_fluv_submissions s ON s.`user_id` = {$userID} AND s.`region_id` = r.`id` AND s.`epiweek_now` = {$temp['epiweek']['round_epiweek']} ORDER BY r.`id` ASC");
