@@ -392,7 +392,7 @@ Output:
 */
 function getAgeGroups($dbh, &$output, $userID) {
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    $result = $dbh->query("SELECT r.`id`, r.`flusurv_name`, r.`name`, r.`ages`, CASE WHEN s.`user_id` IS NULL THEN FALSE ELSE TRUE END `completed` FROM ec_fluv_age_groups r LEFT JOIN ec_fluv_submissions_hosp s ON s.`user_id` = {$userID} AND s.`group_id` = r.`id` AND s.`epiweek_now` = {$temp['epiweek']['round_epiweek']} ORDER BY r.`id` ASC");
@@ -429,11 +429,11 @@ Output:
 */
 function getRegionsExtended($dbh, &$output, $userID) {
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    //Basic region information
-   if(getRegions($output, $userID) !== 1) {
+   if(getRegions($dbh, $output, $userID) !== 1) {
       return getResult($output);
    }
    
@@ -445,12 +445,12 @@ function getRegionsExtended($dbh, &$output, $userID) {
          $firstWeek = 200430;
       }
       
-      if(getHistory($output, $r['id'], $firstWeek) !== 1) {
+      if(getHistory($dbh, $output, $r['id'], $firstWeek) !== 1) {
          return getResult($output);
       }
       
       $r['history'] = $output['history'];
-      if(loadForecast($output, $userID, $r['id']) !== 1) {
+      if(loadForecast($dbh, $output, $userID, $r['id']) !== 1) {
          return getResult($output);
       }
       
@@ -550,7 +550,7 @@ Output:
 */
 function getAgeGroupsExtended($dbh, &$output, $userID) {
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    //Basic region information
@@ -734,7 +734,7 @@ Output:
 function saveForecast($dbh, &$output, $userID, $regionID, $forecast, $commit) {
    
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    $epiweek = $temp['epiweek']['round_epiweek'];
@@ -755,7 +755,7 @@ function saveForecast($dbh, &$output, $userID, $regionID, $forecast, $commit) {
    
    setResult($output, 1);
    
-   getRegions($output, $userID);
+   getRegions($dbh, $output, $userID);
    
    return getResult($output);
 }
@@ -797,7 +797,7 @@ Output:
 
 function saveForecast_hosp($dbh, &$output, $userID, $group_id, $forecast, $commit) {
    $temp = array();
-   if(getEpiweekInfo($temp) !== 1) {
+   if(getEpiweekInfo($dbh, $temp) !== 1) {
       return getResult($temp);
    }
    $epiweek = $temp['epiweek']['round_epiweek'];
@@ -839,7 +839,7 @@ function loadForecast($dbh, &$output, $userID, $regionID, $submitted=false) {
 
    if($submitted) {
       $temp = array();
-      if(getEpiweekInfo($temp) !== 1) {
+      if(getEpiweekInfo($dbh, $temp) !== 1) {
          return getResult($temp);
       }
       
@@ -942,7 +942,7 @@ Output:
 function loadForecast_hosp($dbh, &$output, $userID, $group_id, $submitted=false) {
    if($submitted) {
       $temp = array();
-      if(getEpiweekInfo($temp) !== 1) {
+      if(getEpiweekInfo($dbh, $temp) !== 1) {
          return getResult($temp);
       }
       $q = "SELECT coalesce(max(`epiweek_now`), 0) `epiweek` FROM ec_fluv_submissions_hosp WHERE `user_id` = {$userID} AND `group_id` = {$group_id} AND `epiweek_now` < {$temp['epiweek']['round_epiweek']}";
@@ -1063,7 +1063,7 @@ function getAvailableTaskSets($dbh) {
     $epiweek_now = $temp['epiweek']['round_epiweek'];
     $query = "select taskID, states from ec_fluv_mturk_tasks where numWorker < maxWorker";
     $availableTasks = array();
-    $availableTasks = readSqlResult($query, $availableTasks);
+    $availableTasks = readSqlResult($dbh, $query, $availableTasks);
     return $availableTasks;
 }
 
@@ -1093,7 +1093,7 @@ function getNextLocation($dbh, $mturkID, $regionID) {
 
         $query = "select states from ec_fluv_mturk_tasks where taskID = {$taskID}";
         $states = array();
-        $states = readSqlResult($query, $states);
+        $states = readSqlResult($dbh, $query, $states);
         $states = $states[0]['states'];
         $states = explode(",", $states);
         return $states;
@@ -1110,7 +1110,7 @@ function get_user_forecast_regions($dbh, $user_ID) {
 
     $query = "SELECT states FROM ec_fluv_mturk_tasks WHERE `taskID` = {$task_group}";
     $states = array();
-    $states = readSqlResult($query, $states);
+    $states = readSqlResult($dbh, $query, $states);
     $states = $states[0]['states'];
     $states = explode(",", $states);
 
@@ -1584,7 +1584,7 @@ function getECDCILI($dbh, &$output, $regionID, $firstWeek) {
         array_push($wili, floatval($row['incidence_rate']));
         $firstWeek = addEpiweeks($firstWeek, 1);
     }
-    if (!array_key_exists($output,"ecdc")) {
+    if (!array_key_exists("ecdc",$output)) {
         $output['ecdc'] = array();
     }
     // leaving this as wili for now even though it's not really

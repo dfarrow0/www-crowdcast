@@ -37,7 +37,7 @@ if(isset($_REQUEST['skip_instructions'])) {
 }
 
 if(isset($_REQUEST['region_id'])) {
-   $regionID = intval(mysql_real_escape_string($_REQUEST['region_id']));
+   $regionID = intval(mysqli_real_escape_string($dbh, $_REQUEST['region_id']));
 } else {
    //Default to USA National
    $regionID = 1;
@@ -45,7 +45,7 @@ if(isset($_REQUEST['region_id'])) {
 
 //Specific region
 if(!isset($output['regions'][$regionID])) {
-   fail('Invalid region_id');
+   fail('Invalid region_id '.$regionID);
 }
 
 //Forecast from last round
@@ -164,7 +164,7 @@ $nextOffset = $lastHistory_i;
 foreach ($sources as $src => $meta) {
     $fn = $meta["fn"];
     foreach ($meta["members"] as $name => $rid) {
-	    $fn($output, $rid, $seasonStart+5); // hard-coded for now; ECDC counts seasons from epiweek 40
+	    $fn($dbh, $output, $rid, $seasonStart+5); // hard-coded for now; ECDC counts seasons from epiweek 40
         
         $n = count($output[$meta["key"]][$rid]["date"]);
 ?>
