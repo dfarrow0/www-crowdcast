@@ -1,12 +1,8 @@
-# Status
+# deprecated
 
-[![Deploy Status](https://delphi.midas.cs.cmu.edu/~automation/public/github_deploy_repo/badge.php?repo=cmu-delphi/www-crowdcast)](#)
+This repo was the development "fork" of www-epicast. It has since been
+integrated into, and completely replaced by,
+[the dev branch of www-epicast](https://github.com/cmu-delphi/www-epicast/tree/dev).
 
-# About
-
-The Crowdcast website for collecting flu forecasts.
-
-The site is live at:
-- https://delphi.cmu.edu/crowdcast
-
-A live demo is available at http://demo.epicast.net/ (User ID is `00000000`)
+**No new development should happen in this repo.** It exists only for
+posterity.
